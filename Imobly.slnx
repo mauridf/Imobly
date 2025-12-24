@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="Imobly.API/Imobly.API.csproj" />
+  <Project Path="Imobly.Application/Imobly.Application.csproj" />
+  <Project Path="Imobly.Domain/Imobly.Domain.csproj" />
+  <Project Path="Imobly.Infrastructure/Imobly.Infrastructure.csproj" />
+  <Project Path="Imobly.Tests/Imobly.Tests.csproj" />
+</Solution>

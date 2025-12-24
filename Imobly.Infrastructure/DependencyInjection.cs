@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Imobly.Domain.Interfaces;
 using Imobly.Infrastructure.Data;
+using Imobly.Infrastructure.Repositories;
 
 namespace Imobly.Infrastructure
 {
@@ -17,6 +19,9 @@ namespace Imobly.Infrastructure
                     configuration.GetConnectionString("DefaultConnection"),
                     b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)
                 ));
+
+            // Configurar Unit of Work
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             return services;
         }

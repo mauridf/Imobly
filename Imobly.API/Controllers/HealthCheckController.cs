@@ -1,49 +1,44 @@
-﻿using Imobly.Infrastructure.Data;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Imobly.API.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
-    [AllowAnonymous] // Adicionar esta linha
-    public class HealthCheckController : ControllerBase
+    [ApiController]
+    [AllowAnonymous]
+    public class HealthController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly HealthCheckService _healthCheckService;
 
-        public HealthCheckController(ApplicationDbContext context)
+        public HealthController(HealthCheckService healthCheckService)
         {
-            _context = context;
+            _healthCheckService = healthCheckService;
         }
 
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            try
-            {
-                // Testar conexão com o banco
-                var canConnect = await _context.Database.CanConnectAsync();
+            var report = await _healthCheckService.CheckHealthAsync();
 
-                return Ok(new
-                {
-                    status = "Healthy",
-                    timestamp = DateTime.UtcNow,
-                    database = canConnect ? "Connected" : "Disconnected",
-                    message = "API is running",
-                    version = "1.0.0"
-                });
-            }
-            catch (Exception ex)
+            var result = new
             {
-                return StatusCode(500, new
+                status = report.Status.ToString(),
+                totalDuration = report.TotalDuration,
+                entries = report.Entries.Select(e => new
                 {
-                    status = "Unhealthy",
-                    timestamp = DateTime.UtcNow,
-                    error = ex.Message,
-                    message = "API is running with errors"
-                });
-            }
+                    name = e.Key,
+                    status = e.Value.Status.ToString(),
+                    duration = e.Value.Duration,
+                    description = e.Value.Description,
+                    exception = e.Value.Exception?.Message,
+                    data = e.Value.Data
+                })
+            };
+
+            return report.Status == HealthStatus.Healthy
+                ? Ok(result)
+                : StatusCode(503, result);
         }
     }
 }

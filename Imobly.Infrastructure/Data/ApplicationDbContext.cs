@@ -78,6 +78,9 @@ namespace Imobly.Infrastructure.Data
                 entity.Property(c => c.ValorAluguel).HasPrecision(10, 2);
                 entity.Property(c => c.ValorSeguro).HasPrecision(10, 2);
                 entity.Property(c => c.CaminhoDocumentoPDF).HasMaxLength(255);
+                entity.Property(c => c.Status)
+                      .HasDefaultValue(Domain.Enums.StatusContrato.Ativo)
+                      .HasConversion<int>(); // Converter enum para int no banco
 
                 // 1:N com Recebimento
                 entity.HasMany(c => c.Recebimentos)
@@ -85,10 +88,15 @@ namespace Imobly.Infrastructure.Data
                       .HasForeignKey(r => r.ContratoId)
                       .OnDelete(DeleteBehavior.Cascade);
 
+                // Garantir que nome da coluna está correto
+                entity.Property(c => c.Status)
+                      .HasColumnName("Status")
+                      .IsRequired();
+
                 // Restrição: Um imóvel só pode ter um contrato ativo por vez
                 entity.HasIndex(c => new { c.ImovelId, c.Status })
-                      .HasFilter("Status = 1") // Status = Ativo
-                      .IsUnique(false);
+                      .HasFilter("\"Status\" = 1") // Status = Ativo (1)
+                      .HasDatabaseName("IX_Contratos_ImovelId_Status");
             });
 
             // Configurar Recebimento

@@ -21,8 +21,9 @@ namespace Imobly.Domain.Entities
         public int DiaVencimento { get; set; }
         public StatusContrato Status { get; set; } = StatusContrato.Ativo;
 
+        [Required]
         [MaxLength(255)]
-        public string CaminhoDocumentoPDF { get; set; }
+        public string CaminhoDocumentoPDF { get; set; } = string.Empty;
 
         // Navigation Properties
         public virtual Imovel Imovel { get; set; }

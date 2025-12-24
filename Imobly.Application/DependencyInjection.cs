@@ -22,7 +22,7 @@ namespace Imobly.Application
             services.AddScoped<IHistoricoReajusteService, HistoricoReajusteService>();
 
             // AutoMapper
-            services.AddAutoMapper(typeof(MappingProfile));
+            services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 
             return services;
         }

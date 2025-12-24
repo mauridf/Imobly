@@ -143,69 +143,6 @@ namespace Imobly.Application.Services
             return manutencoesPendentes;
         }
 
-        // Método adicional para estatísticas detalhadas
-        public async Task<object> GetEstatisticasDetalhadasAsync(Guid usuarioId)
-        {
-            var hoje = DateTime.UtcNow;
-            var inicioAno = new DateTime(hoje.Year, 1, 1);
-            var fimAno = new DateTime(hoje.Year, 12, 31);
-
-            // Total recebido no ano
-            var totalRecebidoAno = 0m;
-            for (int mes = 1; mes <= 12; mes++)
-            {
-                totalRecebidoAno += await _unitOfWork.Recebimentos.GetTotalRecebidoNoMesAsync(usuarioId, mes, hoje.Year);
-            }
-
-            // Total despesas no ano
-            var movimentacoesAno = await _unitOfWork.MovimentacoesFinanceiras.GetByPeriodoAsync(
-                usuarioId, inicioAno, fimAno);
-
-            var totalDespesasAno = movimentacoesAno
-                .Where(m => m.Tipo == TipoMovimentacao.Despesa && m.Status == StatusMovimentacao.Pago)
-                .Sum(m => m.Valor);
-
-            // Locatários inadimplentes
-            var contratos = await _unitOfWork.Contratos.GetAtivosByUsuarioIdAsync(usuarioId);
-            var locatariosIds = contratos.Select(c => c.LocatarioId).Distinct();
-            var locatarios = await _unitOfWork.Locatarios.FindAsync(l => locatariosIds.Contains(l.Id));
-            var locatariosInadimplentes = locatarios.Count(l => l.Status == StatusLocatario.Inadimplente);
-
-            // Recebimentos atrasados
-            var recebimentosAtrasados = await _unitOfWork.Recebimentos.GetAtrasadosByUsuarioIdAsync(usuarioId);
-            var totalAtrasado = recebimentosAtrasados.Sum(r => r.ValorPrevisto);
-
-            return new
-            {
-                TotalRecebidoAno = totalRecebidoAno,
-                TotalDespesasAno = totalDespesasAno,
-                SaldoAno = totalRecebidoAno - totalDespesasAno,
-                LocatariosInadimplentes = locatariosInadimplentes,
-                TotalAtrasado = totalAtrasado,
-                PercentualInadimplencia = contratos.Any() ?
-                    (decimal)locatariosInadimplentes / contratos.Count() * 100 : 0,
-                MesMaisRentavel = await GetMesMaisRentavelAsync(usuarioId, hoje.Year)
-            };
-        }
-
-        private async Task<string> GetMesMaisRentavelAsync(Guid usuarioId, int ano)
-        {
-            var receitasPorMes = new Dictionary<int, decimal>();
-
-            for (int mes = 1; mes <= 12; mes++)
-            {
-                var receita = await _unitOfWork.Recebimentos.GetTotalRecebidoNoMesAsync(usuarioId, mes, ano);
-                receitasPorMes[mes] = receita;
-            }
-
-            if (receitasPorMes.All(r => r.Value == 0))
-                return "Nenhum";
-
-            var mesMaisRentavel = receitasPorMes.OrderByDescending(r => r.Value).First();
-            var cultura = new System.Globalization.CultureInfo("pt-BR");
-            return cultura.DateTimeFormat.GetMonthName(mesMaisRentavel.Key);
-        }
-
         public async Task<EstatisticasDetalhadasDto> GetEstatisticasDetalhadasAsync(Guid usuarioId)
         {
             var hoje = DateTime.UtcNow;
@@ -260,6 +197,24 @@ namespace Imobly.Application.Services
                 ContratosVencendoProximoMes = contratosVencendoProximoMes,
                 PrevisaoReceitaProximoMes = previsaoReceitaProximoMes
             };
+        }
+
+        private async Task<string> GetMesMaisRentavelAsync(Guid usuarioId, int ano)
+        {
+            var receitasPorMes = new Dictionary<int, decimal>();
+
+            for (int mes = 1; mes <= 12; mes++)
+            {
+                var receita = await _unitOfWork.Recebimentos.GetTotalRecebidoNoMesAsync(usuarioId, mes, ano);
+                receitasPorMes[mes] = receita;
+            }
+
+            if (receitasPorMes.All(r => r.Value == 0))
+                return "Nenhum";
+
+            var mesMaisRentavel = receitasPorMes.OrderByDescending(r => r.Value).First();
+            var cultura = new System.Globalization.CultureInfo("pt-BR");
+            return cultura.DateTimeFormat.GetMonthName(mesMaisRentavel.Key);
         }
     }
 }

@@ -11,5 +11,6 @@ namespace Imobly.Application.Interfaces
         Task<bool> DeleteAsync(Guid id, Guid usuarioId);
         Task<decimal> CalcularReajusteAsync(decimal valorAtual, string indice, decimal percentual);
         Task<IEnumerable<HistoricoReajusteDto>> GetUltimosReajustesAsync(Guid usuarioId, int quantidade = 10);
+        Task<object> SugerirReajusteAsync(Guid contratoId, Guid usuarioId, string indice);
     }
 }

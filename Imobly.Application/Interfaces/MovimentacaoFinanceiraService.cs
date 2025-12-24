@@ -187,7 +187,6 @@ namespace Imobly.Application.Services
             return await _unitOfWork.MovimentacoesFinanceiras.GetSaldoPeriodoAsync(usuarioId, inicio, fim);
         }
 
-        // Método auxiliar para gerar relatório financeiro
         public async Task<object> GerarRelatorioFinanceiroAsync(Guid usuarioId, int ano)
         {
             var resultado = new List<object>();

@@ -13,5 +13,6 @@ namespace Imobly.Application.Interfaces
         Task<bool> DeleteAsync(Guid id, Guid usuarioId);
         Task<bool> RegistrarPagamentoAsync(Guid id, Guid usuarioId);
         Task<decimal> GetSaldoPeriodoAsync(Guid usuarioId, DateTime inicio, DateTime fim);
+        Task<object> GerarRelatorioFinanceiroAsync(Guid usuarioId, int ano);
     }
 }

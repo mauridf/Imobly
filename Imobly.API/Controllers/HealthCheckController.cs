@@ -1,11 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Imobly.Infrastructure.Data;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Imobly.Infrastructure.Data;
 
 namespace Imobly.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [AllowAnonymous] // Adicionar esta linha
     public class HealthCheckController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -28,7 +30,8 @@ namespace Imobly.API.Controllers
                     status = "Healthy",
                     timestamp = DateTime.UtcNow,
                     database = canConnect ? "Connected" : "Disconnected",
-                    message = "API is running"
+                    message = "API is running",
+                    version = "1.0.0"
                 });
             }
             catch (Exception ex)

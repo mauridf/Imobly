@@ -182,7 +182,6 @@ namespace Imobly.Application.Services
                 historicos.OrderByDescending(h => h.DataReajuste).Take(quantidade));
         }
 
-        // Método auxiliar para sugerir reajuste baseado em índice oficial
         public async Task<object> SugerirReajusteAsync(Guid contratoId, Guid usuarioId, string indice)
         {
             var contrato = await _unitOfWork.Contratos.GetWithDetailsAsync(contratoId);

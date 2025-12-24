@@ -99,7 +99,12 @@ namespace Imobly.Application.Services
         private string GenerateJwtToken(Domain.Entities.Usuario usuario)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
+            var keyString = _configuration["Jwt:Key"];
+            if (string.IsNullOrEmpty(keyString))
+            {
+                throw new InvalidOperationException("A chave JWT não está configurada.");
+            }
+            var key = Encoding.ASCII.GetBytes(keyString);
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
